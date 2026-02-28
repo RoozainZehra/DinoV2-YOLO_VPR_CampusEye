@@ -44,23 +44,36 @@ print("VPR system loaded successfully.")
 @app.post("/predict-location")
 async def predict_location(file: UploadFile = File(...)):
     try:
+        print("\n===== /predict-location API CALLED =====")
+
         contents = await file.read()
+        print("Image received. Size (bytes):", len(contents))
 
         # Extract embedding using YOLO + DINOv2
+        print("Extracting embedding...")
         query_emb = extract_embedding_with_yolo(contents, model, device)
+        print("Embedding shape:", query_emb.shape)
 
         # Cosine similarity
+        print("Computing cosine similarity...")
         similarities = F.cosine_similarity(query_emb, database_embeddings)
+        print("Similarity scores:", similarities)
 
         best_index = torch.argmax(similarities).item()
+        print("Best match index:", best_index)
 
         predicted_label = database_labels[best_index].item()
+        print("Predicted label index:", predicted_label)
 
         predicted_location = idx_to_class[str(predicted_label)]
-        
+        print("Predicted location:", predicted_location)
+
+        print("===== PREDICTION COMPLETE =====\n")
+
         return {"location": predicted_location}
 
     except Exception as e:
         import traceback
+        print("ERROR OCCURRED:")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
