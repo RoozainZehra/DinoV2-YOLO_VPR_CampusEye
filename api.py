@@ -40,6 +40,13 @@ with open(os.path.join(VPR_DIR, "idx_to_class.json")) as f:
 print("VPR system loaded successfully.")
 
 
+# check server is up
+@app.get("/")
+def root():
+    """Health check endpoint"""
+    return {"status": "CampusEye Image Processing API is running"}
+
+
 # VPR API call
 @app.post("/predict-location")
 async def predict_location(file: UploadFile = File(...)):
